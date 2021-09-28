@@ -1,5 +1,6 @@
 package com.example.sdn6.entity;
 
+import java.util.Objects;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.RelationshipProperties;
@@ -78,4 +79,21 @@ public class NoeudMaquetteAPourEnfantRelationEntity {
     public void setMax(Integer max) {
         this.max = max;
     }
+/*
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NoeudMaquetteAPourEnfantRelationEntity that = (NoeudMaquetteAPourEnfantRelationEntity) o;
+        return Objects.equals(enfant, that.enfant);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(enfant);
+    }*/
 }

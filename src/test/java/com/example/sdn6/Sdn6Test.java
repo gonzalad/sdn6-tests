@@ -116,16 +116,19 @@ class Sdn6Test {
         FormationEntity f1 = newFormation("F1");
         ObjetFormationEntity of2 = newObjetFormation("OF2");
         ObjetFormationEntity of1 = newObjetFormation("OF1");
-        // of1.addEnfant(of2, true);
+        of1.addEnfant(of2, true);
         f1.addEnfant(of1, true);
         f1.addEnfant(of2, true);
         List<NoeudMaquetteEntity> entities = List.of(
-            // of2,
-            // of1,
+            of2,
+            of1,
             f1
         );
 
         noeudMaquetteRepository.saveAll(entities);
+        /*noeudMaquetteRepository.save(f1);
+        noeudMaquetteRepository.save(of1);
+        noeudMaquetteRepository.save(of2);*/
 
         Optional<NoeudMaquetteEntity> f1Lue = spa.lireNoeudAvecDescendance(f1.getIdDefinition());
         assertThat(f1Lue).isNotEmpty();
