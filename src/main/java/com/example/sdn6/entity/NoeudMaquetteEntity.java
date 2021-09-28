@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -31,6 +32,7 @@ public abstract class NoeudMaquetteEntity {
     private String contrainteVersion;
 
     @Relationship(type = "EST_DE_TYPE")
+    // @ReadOnlyProperty
     private NoeudTypeEntity type;
 
     @Relationship(type = "A_POUR_ENFANT")
@@ -127,7 +129,7 @@ public abstract class NoeudMaquetteEntity {
             setEnfants(new ArrayList<>());
         }
         getEnfants().add(lien);
-        // TODO: bidirection (lien.getEnfant()).addLienParent(lien);
+        lien.getEnfant().addLienParent(lien);
     }
 
     protected abstract void addLienParent(NoeudMaquetteAPourEnfantRelationEntity lien);

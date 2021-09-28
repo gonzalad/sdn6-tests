@@ -2,6 +2,7 @@ package com.example.sdn6.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
@@ -9,6 +10,7 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 public class ObjetFormationEntity extends NoeudMaquetteEntity {
 
     @Relationship(type = "A_POUR_ENFANT", direction = Relationship.Direction.INCOMING)
+    @ReadOnlyProperty
     private List<NoeudMaquetteAPourEnfantRelationEntity> parents;
 
     public List<NoeudMaquetteAPourEnfantRelationEntity> getParents() {

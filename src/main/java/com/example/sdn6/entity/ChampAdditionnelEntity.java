@@ -83,6 +83,7 @@ public class ChampAdditionnelEntity {
         this.ordre = ordre;
     }
 
+    /*
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -99,4 +100,6 @@ public class ChampAdditionnelEntity {
     public int hashCode() {
         return code.hashCode();
     }
+
+     */
 }

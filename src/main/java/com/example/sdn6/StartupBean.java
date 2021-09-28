@@ -21,12 +21,12 @@ public class StartupBean implements ApplicationListener<ContextRefreshedEvent> {
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        repository.deleteAll();
+        /*repository.deleteAll();
         List<ObjetFormationEntity> entities = List.of(
             newObjetFormation("OF1"),
             newObjetFormation("OF2")
         );
-        repository.saveAll(entities);
+        repository.saveAll(entities);*/
     }
 
     private ObjetFormationEntity newObjetFormation(String code) {

@@ -8,11 +8,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.example.sdn6.entity.Categorie;
 import com.example.sdn6.entity.ChampAdditionnelEntity;
 import com.example.sdn6.entity.FormationEntity;
+import com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
 import com.example.sdn6.entity.NoeudTypeEntity;
 import com.example.sdn6.entity.ObjetFormationEntity;
 import com.example.sdn6.entity.TypeChampAdditionnel;
 import com.example.sdn6.repository.FormationRepository;
+import com.example.sdn6.repository.NoeudMaquetteRepository;
 import com.example.sdn6.repository.NoeudTypeRepository;
 import com.example.sdn6.repository.ObjetFormationRepository;
 import com.example.sdn6.spa.NoeudMaquetteServicePortAdapter;
@@ -29,6 +31,9 @@ class Sdn6Test {
 
     @Autowired
     private FormationRepository formationRepository;
+
+    @Autowired
+    private NoeudMaquetteRepository noeudMaquetteRepository;
 
     @Autowired
     private NoeudTypeRepository noeudTypeRepository;
@@ -85,7 +90,9 @@ class Sdn6Test {
     void lireArbre() {
         FormationEntity f1 = newFormation("F1");
         ObjetFormationEntity of1 = newObjetFormation("OF1");
+        ObjetFormationEntity of2 = newObjetFormation("OF2");
         f1.addEnfant(of1, true);
+        f1.addEnfant(of2, true);
         FormationEntity f2 = newFormation("F2");
         List<FormationEntity> entities = List.of(
             f1,
@@ -97,8 +104,46 @@ class Sdn6Test {
 
         assertThat(f1Lue).isNotEmpty();
         assertThat(f1Lue.get().getCode()).isEqualTo(f1.getCode());
-        assertThat(f1Lue.get().getEnfants()).hasSize(1);
-        assertThat(f1Lue.get().getEnfants().get(0).getEnfant().getCode()).isEqualTo(of1.getCode());
+        assertThat(f1Lue.get().getEnfants()).hasSize(2);
+        assertThat(f1Lue.get().getEnfants())
+            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
+            .extracting(NoeudMaquetteEntity::getCode)
+            .containsExactlyInAnyOrder(of1.getCode(), of2.getCode());
+    }
+
+    @Test
+    void lireArbreAvecObjetsDupliques() {
+        FormationEntity f1 = newFormation("F1");
+        ObjetFormationEntity of2 = newObjetFormation("OF2");
+        ObjetFormationEntity of1 = newObjetFormation("OF1");
+        // of1.addEnfant(of2, true);
+        f1.addEnfant(of1, true);
+        f1.addEnfant(of2, true);
+        List<NoeudMaquetteEntity> entities = List.of(
+            // of2,
+            // of1,
+            f1
+        );
+
+        noeudMaquetteRepository.saveAll(entities);
+
+        Optional<NoeudMaquetteEntity> f1Lue = spa.lireNoeudAvecDescendance(f1.getIdDefinition());
+        assertThat(f1Lue).isNotEmpty();
+        assertThat(f1Lue.get().getCode()).isEqualTo(f1.getCode());
+        assertThat(f1Lue.get().getEnfants())
+            .hasSize(2)
+            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
+            .extracting(NoeudMaquetteEntity::getCode)
+            .containsExactlyInAnyOrder(of1.getCode(), of2.getCode());
+        assertThat(f1Lue.get().getEnfants())
+            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
+            .filteredOn(om -> of1.getCode().equals(om.getCode()))
+            .flatExtracting(NoeudMaquetteEntity::getEnfants)
+            .hasSize(1)
+            .element(0)
+            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
+            .extracting(NoeudMaquetteEntity::getCode)
+            .isEqualTo(of2.getCode());
     }
 
     private ObjetFormationEntity newObjetFormation(String code) {
