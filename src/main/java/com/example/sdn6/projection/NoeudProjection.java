@@ -5,6 +5,8 @@ import java.util.UUID;
 
 public class NoeudProjection {
 
+    private Long id;
+
     private UUID idImmuable;
 
     private String codeStructure;
@@ -18,6 +20,14 @@ public class NoeudProjection {
     private String contrainteVersion;
 
     //private Type type;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     private List<Enfant> enfants;
 

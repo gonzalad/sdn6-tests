@@ -10,7 +10,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEntity, Long> {
+public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEntity, Long>, CustomNoeudMaquetteRepository {
 
     //@formatter:off
     @Query("MATCH /*+ OGM READ_ONLY */ e = (racine:ObjetMaquette)-[re:A_POUR_ENFANT*0..]->(om:ObjetMaquette)\n"

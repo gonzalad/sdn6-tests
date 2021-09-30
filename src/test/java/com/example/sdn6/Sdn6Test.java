@@ -43,6 +43,7 @@ class Sdn6Test {
     private NoeudMaquetteServicePortAdapter spa;
 
     private NoeudTypeEntity formationType;
+
     private NoeudTypeEntity parcoursType;
 
     @BeforeEach
@@ -267,9 +268,38 @@ class Sdn6Test {
         noeudMaquetteRepository.saveAll(entities);
 
         // 2. Récupération d'un noeud et persistance du noeud
-        Optional<NoeudProjection> projection = spa.lireNoeudProjection(of1.getIdDefinition());
-        assertThat(projection).isNotEmpty();
-        assertThat(projection.get().getCode()).isEqualTo("OF1");
+        Optional<NoeudProjection> projectionAModifier = spa.lireNoeudProjection(of1.getIdDefinition());
+        assertThat(projectionAModifier).isNotEmpty();
+        assertThat(projectionAModifier.get().getCode()).isEqualTo("OF1");
+        projectionAModifier.get().setLibelleCourt("modifie");
+        noeudMaquetteRepository.save(projectionAModifier.get());
+
+        // 3. Vérification des relations de la formation
+        Optional<NoeudMaquetteEntity> f1Lue = spa.lireNoeudAvecDescendance(f1.getIdDefinition());
+        assertThat(f1Lue)
+            .get()
+            .isInstanceOf(FormationEntity.class);
+        assertThat(f1Lue.get().getEnfants())
+            .hasSize(2)
+            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
+            .extracting(NoeudMaquetteEntity::getCode)
+            .containsExactlyInAnyOrder(of1.getCode(), of2.getCode());
+        assertThat(f1Lue.get().getEnfants())
+            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
+            .filteredOn(om -> om.getCode().equals(projectionAModifier.get().getCode()))
+            .element(0)
+            .satisfies(om -> {
+                // on vérifie que l'attribut a bien été modifié
+                assertThat(om.getLibelleCourt()).isEqualTo("modifie");
+                // on vérifie que les attributs n'existant pas dans NoeudProjection sont bien conservés
+                assertThat(om.getLibelleLong()).isEqualTo("libelleLong");
+                // la relation (of1)-[:HAS_ENFANT]->(of11) a été conservée, youhou !!!
+                assertThat(om.getEnfants())
+                    .hasSize(1)
+                    .element(0)
+                    .isInstanceOf(ObjetFormationEntity.class);
+            });
+
     }
 
     private ObjetFormationEntity newObjetFormation(String code) {
