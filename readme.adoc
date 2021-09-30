@@ -1,0 +1,25 @@
+= Issue when using projection persistence with primitive fields
+
+I have an entity with primitive fields (i.e. boolean).
+
+I want to use a projection to persist a part of the data.
+
+My projection class has not defined the primitive fields.
+
+When I persist the data, I get a:
+
+```
+java.lang.NullPointerException
+	at java.base/sun.invoke.util.ValueConversions.unboxBoolean(ValueConversions.java:108)
+	at com.example.sdn6.entity.NoeudMaquetteEntity_Accessor_dh80lb.setProperty(Unknown Source)
+	at org.springframework.data.mapping.model.InstantiationAwarePropertyAccessor.setProperty(InstantiationAwarePropertyAccessor.java:104)
+	at org.springframework.data.neo4j.core.mapping.EntityFromDtoInstantiatingConverter.lambda$convert$0(EntityFromDtoInstantiatingConverter.java:94)
+	at org.springframework.data.mapping.model.BasicPersistentEntity.doWithProperties(BasicPersistentEntity.java:374)
+	at org.springframework.data.neo4j.core.mapping.EntityFromDtoInstantiatingConverter.convert(EntityFromDtoInstantiatingConverter.java:87)
+	at org.springframework.data.neo4j.core.Neo4jTemplate.doSave(Neo4jTemplate.java:942)
+```
+
+To reproduce, execute the testcase com.example.sdn6.Sdn6Test#testProjection
+
+
+
