@@ -5,20 +5,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
-import com.example.sdn6.entity.noeud.NoeudViewEntity;
+import com.example.sdn6.projection.NoeudProjection;
 import com.example.sdn6.repository.NoeudMaquetteRepository;
-import com.example.sdn6.repository.NoeudProjectionRepository;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NoeudMaquetteServicePortAdapter {
 
     private final NoeudMaquetteRepository repository;
-    private final NoeudProjectionRepository noeudProjectionRepository;
 
-    public NoeudMaquetteServicePortAdapter(NoeudMaquetteRepository repository, NoeudProjectionRepository noeudProjectionRepository) {
+    public NoeudMaquetteServicePortAdapter(NoeudMaquetteRepository repository) {
         this.repository = repository;
-        this.noeudProjectionRepository = noeudProjectionRepository;
     }
 
     public Optional<NoeudMaquetteEntity> lireNoeudAvecDescendance(UUID idDefinition) {
@@ -36,7 +33,7 @@ public class NoeudMaquetteServicePortAdapter {
         return repository.lireNoeud(idDefinition);
     }
 
-    public Optional<NoeudViewEntity> lireNoeudProjection(UUID idDefinition) {
-        return noeudProjectionRepository.lireNoeudProjection(idDefinition);
+    public Optional<NoeudProjection> lireNoeudProjection(UUID idDefinition) {
+        return repository.findProjectionByIdDefinition(idDefinition);
     }
 }

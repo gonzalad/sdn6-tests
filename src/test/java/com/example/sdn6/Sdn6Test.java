@@ -13,15 +13,13 @@ import com.example.sdn6.entity.NoeudMaquetteEntity;
 import com.example.sdn6.entity.NoeudTypeEntity;
 import com.example.sdn6.entity.ObjetFormationEntity;
 import com.example.sdn6.entity.TypeChampAdditionnel;
-import com.example.sdn6.entity.noeud.NoeudViewEntity;
+import com.example.sdn6.projection.NoeudProjection;
 import com.example.sdn6.repository.FormationRepository;
 import com.example.sdn6.repository.NoeudMaquetteRepository;
-import com.example.sdn6.repository.NoeudProjectionRepository;
 import com.example.sdn6.repository.NoeudTypeRepository;
 import com.example.sdn6.repository.ObjetFormationRepository;
 import com.example.sdn6.spa.NoeudMaquetteServicePortAdapter;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,9 +41,6 @@ class Sdn6Test {
 
     @Autowired
     private NoeudMaquetteServicePortAdapter spa;
-
-    @Autowired
-    private NoeudProjectionRepository noeudProjectionRepository;
 
     private NoeudTypeEntity formationType;
     private NoeudTypeEntity parcoursType;
@@ -251,14 +246,8 @@ class Sdn6Test {
             });
     }
 
-    /**
-     * Montre le soucis: si on load et qu'on persiste juste un noeud, alors on perd des relations
-     * <p>
-     * Ne fonctionne pas, car on a au démarrage org.springframework.data.mapping.MappingException: The schema already contains a node description under the primary label ObjetMaquette
-     */
     @Test
-    @Disabled
-    void whenPersistViewThenVerifyRelationsInGraphArePreserved() {
+    void testProjection() {
 
         // 1. Création graphe initial
         FormationEntity f1 = newFormation("F1");
@@ -278,37 +267,9 @@ class Sdn6Test {
         noeudMaquetteRepository.saveAll(entities);
 
         // 2. Récupération d'un noeud et persistance du noeud
-        Optional<NoeudViewEntity> of1AModifier = spa.lireNoeudProjection(of1.getIdDefinition());
-        assertThat(of1AModifier).isNotEmpty();
-        assertThat(of1AModifier.get().getCode()).isEqualTo("OF1");
-        of1AModifier.get().setLibelleCourt("modifie");
-        noeudProjectionRepository.save(of1AModifier.get());
-
-        // 3. Vérification des relations de la formation
-        Optional<NoeudMaquetteEntity> f1Lue = spa.lireNoeudAvecDescendance(f1.getIdDefinition());
-        assertThat(f1Lue)
-            .get()
-            .isInstanceOf(FormationEntity.class);
-        assertThat(f1Lue.get().getEnfants())
-            .hasSize(2)
-            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
-            .extracting(NoeudMaquetteEntity::getCode)
-            .containsExactlyInAnyOrder(of1.getCode(), of2.getCode());
-        assertThat(f1Lue.get().getEnfants())
-            .extracting(NoeudMaquetteAPourEnfantRelationEntity::getEnfant)
-            .filteredOn(om -> om.getCode().equals(of1AModifier.get().getCode()))
-            .element(0)
-            .satisfies(om -> {
-                // on vérifie que l'attribut a bien été modifié
-                assertThat(om.getLibelleCourt()).isEqualTo("modifie");
-                // on vérifie que les attributs n'existant pas dans NoeudProjection sont bien conservés
-                assertThat(om.getLibelleLong()).isEqualTo("libelleLong");
-                // la relation (of1)-[:HAS_ENFANT]->(of11) a été conservée, youhou !!!
-                assertThat(om.getEnfants())
-                    .hasSize(1)
-                    .element(0)
-                    .isInstanceOf(ObjetFormationEntity.class);
-            });
+        Optional<NoeudProjection> projection = spa.lireNoeudProjection(of1.getIdDefinition());
+        assertThat(projection).isNotEmpty();
+        assertThat(projection.get().getCode()).isEqualTo("OF1");
     }
 
     private ObjetFormationEntity newObjetFormation(String code) {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
+import com.example.sdn6.projection.NoeudProjection;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -50,5 +51,17 @@ public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEnt
     )
     //@formatter:on
     Optional<NoeudMaquetteEntity> lireNoeud(UUID idDefinition);
+
+    //@formatter:off
+    @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"
+        + " WHERE om.idDefinition = $idDefinition\n"
+        + " WITH om\n"
+        + " MATCH t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->()\n"
+        + " WITH om, collect(relationships(t)) as type, collect(nodes(t)) as nt\n"
+        + " OPTIONAL MATCH (om)-[re:A_POUR_ENFANT]->(e)\n"
+        + " RETURN om, type, nt, collect(re) as enfants, collect(e) as ne\n"
+    )
+    //@formatter:on
+    Optional<NoeudProjection> findProjectionByIdDefinition(UUID idDefinition);
 
 }
