@@ -1,6 +1,7 @@
 package com.example.sdn6.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -30,4 +31,24 @@ public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEnt
     )
     //@formatter:on
     List<NoeudMaquetteEntity> findArbre(UUID idDefinition);
+
+    //@formatter:off
+    @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"
+        + " WHERE om.idDefinition = $idDefinition\n"
+        + " WITH om\n"
+        + " MATCH t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->()\n"
+        + " RETURN om, collect(relationships(t)) as type, collect(nodes(t)) as nt\n"
+//        + " RETURN om,\n"
+//        + "   enfants, e"
+        // +","
+        //      + "\n"
+        //    + "   [[t = (om)-[:A_POUR_ENFANT]->() | nodes(t)]],\n"
+        //+ "   [[t = (om)-[:A_POUR_ENFANT]->() | relationships(t)]] as enfants,\n"
+        //+ "   [[t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->() | [nodes(t), relationships(t)]]]\n"
+/*        + "   [[n = (enfant)-[:EST_DE_NATURE]->() | [nodes(n), relationships(n)]]],"
+        + "   [[gh = (enfant)-[:A_POUR_GROUPE_HABILITATION*0..1]->() | [nodes(gh), relationships(gh)]]]"*/
+    )
+    //@formatter:on
+    Optional<NoeudMaquetteEntity> lireNoeud(UUID idDefinition);
+
 }
