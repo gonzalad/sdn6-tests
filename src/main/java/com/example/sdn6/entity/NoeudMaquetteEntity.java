@@ -23,7 +23,7 @@ public class NoeudMaquetteEntity {
     private String libelleLong;
 
     @Relationship(type = "A_POUR_ENFANT")
-    private List<NoeudMaquetteAPourEnfantRelationEntity> enfants;
+    private NoeudMaquetteAPourEnfantRelationEntity enfants;
 
     @Relationship(type = "A_POUR_ENFANT", direction = Relationship.Direction.INCOMING)
     @ReadOnlyProperty
@@ -61,11 +61,11 @@ public class NoeudMaquetteEntity {
         this.libelleCourt = libelleCourt;
     }
 
-    public List<NoeudMaquetteAPourEnfantRelationEntity> getEnfants() {
+    public NoeudMaquetteAPourEnfantRelationEntity getEnfants() {
         return enfants;
     }
 
-    public void setEnfants(List<NoeudMaquetteAPourEnfantRelationEntity> enfants) {
+    public void setEnfants(NoeudMaquetteAPourEnfantRelationEntity enfants) {
         this.enfants = enfants;
     }
 
@@ -84,11 +84,7 @@ public class NoeudMaquetteEntity {
     }
 
     public void addEnfant(NoeudMaquetteAPourEnfantRelationEntity lien) {
-        if (getEnfants() == null) {
-            setEnfants(new ArrayList<>());
-        }
-        getEnfants().add(lien);
-        lien.getEnfant().addLienParent(lien);
+        setEnfants(lien);
     }
 
     private void addLienParent(NoeudMaquetteAPourEnfantRelationEntity lien) {

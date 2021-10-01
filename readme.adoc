@@ -2,28 +2,51 @@
 
 I create a projection class for my entity, and a projection for its relations.
 
-When my repository queries the db, it returns the projection entity but the class of
-the relation attribute is the original @RelationshipProperties class and not the projected
-class.
+When my repository queries the db, it returns the projection entity but doesn't try
+to convert the @RelationshipProperties class to the projected class (Enfant).
 
 The following testcase fragment:
 
 ```
 Optional<NoeudProjection> projectionAModifier = repository.findProjectionByIdDefinition(of1.getIdDefinition());
-assertThat(projectionAModifier).isNotEmpty();
-assertThat(projectionAModifier.get().getCode()).isEqualTo("OF1");
-assertThat(projectionAModifier.get().getEnfants()).isOfAnyClassIn(Enfant.class);
 ```
 
 Generates the error:
 
 ```
-Expecting:
-  [com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity@4c599679]
-to be of one these types:
-  [com.example.sdn6.projection.Enfant]
-but was:
-  java.util.ArrayList
+Cannot cast com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity to com.example.sdn6.projection.Enfant
+java.lang.ClassCastException: Cannot cast com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity to com.example.sdn6.projection.Enfant
+	at java.base/java.lang.Class.cast(Class.java:3605)
+	at com.example.sdn6.projection.NoeudProjection_Accessor_payilt.setProperty(Unknown Source)
+	at org.springframework.data.mapping.model.InstantiationAwarePropertyAccessor.setProperty(InstantiationAwarePropertyAccessor.java:104)
+	at org.springframework.data.neo4j.core.mapping.DtoInstantiatingConverter.setPropertyOnDtoObject(DtoInstantiatingConverter.java:183)
+	at org.springframework.data.neo4j.core.mapping.DtoInstantiatingConverter.lambda$convert$4(DtoInstantiatingConverter.java:146)
+	at org.springframework.data.mapping.PersistentEntity.lambda$doWithAll$0(PersistentEntity.java:257)
+	at org.springframework.data.mapping.model.BasicPersistentEntity.doWithAssociations(BasicPersistentEntity.java:387)
+	at org.springframework.data.mapping.PersistentEntity.doWithAll(PersistentEntity.java:256)
+	at org.springframework.data.neo4j.core.mapping.DtoInstantiatingConverter.convert(DtoInstantiatingConverter.java:145)
+	at org.springframework.data.neo4j.repository.query.AbstractNeo4jQuery.lambda$execute$2(AbstractNeo4jQuery.java:102)
+	at org.springframework.data.repository.query.ResultProcessor$ChainingConverter.convert(ResultProcessor.java:240)
+	at org.springframework.data.repository.query.ResultProcessor$ChainingConverter.lambda$and$0(ResultProcessor.java:226)
+	at org.springframework.data.repository.query.ResultProcessor$ChainingConverter.convert(ResultProcessor.java:240)
+	at org.springframework.data.repository.query.ResultProcessor.processResult(ResultProcessor.java:170)
+	at org.springframework.data.neo4j.repository.query.AbstractNeo4jQuery.execute(AbstractNeo4jQuery.java:111)
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.doInvoke(RepositoryMethodInvoker.java:137)
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke(RepositoryMethodInvoker.java:121)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.doInvoke(QueryExecutorMethodInterceptor.java:159)
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.invoke(QueryExecutorMethodInterceptor.java:138)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:388)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:215)
+	at com.sun.proxy.$Proxy89.findProjectionByIdDefinition(Unknown Source)
+	at com.example.sdn6.Sdn6Test.testProjection(Sdn6Test.java:51)
 ```
 
 To reproduce the error just run Sdn6Test testcase

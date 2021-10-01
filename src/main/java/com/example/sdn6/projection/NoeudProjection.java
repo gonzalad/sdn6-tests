@@ -19,7 +19,7 @@ public class NoeudProjection {
         this.id = id;
     }
 
-    private List<Enfant> enfants;
+    private Enfant enfants;
 
     public UUID getIdDefinition() {
         return idDefinition;
@@ -53,11 +53,11 @@ public class NoeudProjection {
         this.libelleLong = libelleLong;
     }
 
-    public List<Enfant> getEnfants() {
+    public Enfant getEnfants() {
         return enfants;
     }
 
-    public void setEnfants(List<Enfant> enfants) {
+    public void setEnfants(Enfant enfants) {
         this.enfants = enfants;
     }
 }

@@ -24,7 +24,7 @@ public class NoeudMaquetteServicePortAdapter {
         // puisse distinguer les cas:
         // - relation non lue
         // - relation non existante
-        oms.stream().filter(om -> om.getEnfants() == null).forEach(om -> om.setEnfants(new ArrayList<>()));
+        // oms.stream().filter(om -> om.getEnfants() == null).forEach(om -> om.setEnfants(new ArrayList<>()));
         return oms.stream().filter(it -> it.getIdDefinition().equals(idDefinition)).findAny();
     }
 }
