@@ -3,14 +3,14 @@ package com.example.sdn6.repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import com.example.sdn6.entity.NoeudMaquetteEntity;
+import com.example.sdn6.entity.NoeudEntity;
 import com.example.sdn6.projection.NoeudProjection;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEntity, Long>, CustomNoeudMaquetteRepository {
+public interface NoeudMaquetteRepository extends CrudRepository<NoeudEntity, Long>, CustomNoeudMaquetteRepository {
 
     /**
      * A noter cette méthode retourne une liste alors qu'on s'attend à un seul résultat.
@@ -24,7 +24,7 @@ public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEnt
         + " RETURN om, collect(re) as enfants, collect(e) as ne\n"
     )
     //@formatter:on
-    List<NoeudMaquetteEntity> findArbre(UUID idDefinition);
+    List<NoeudEntity> findArbre(UUID idDefinition);
 
     //@formatter:off
     @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"
@@ -32,7 +32,7 @@ public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEnt
         + " RETURN om\n"
     )
     //@formatter:on
-    Optional<NoeudMaquetteEntity> lireNoeud(UUID idDefinition);
+    Optional<NoeudEntity> lireNoeud(UUID idDefinition);
 
     //@formatter:off
 //    @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"

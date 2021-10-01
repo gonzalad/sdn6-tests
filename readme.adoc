@@ -1,9 +1,9 @@
-= Issue when projecting relations (@RelationshipProperties)
+= Issue when projecting relations
 
-I create a projection class for my entity, and a projection for its relations.
+I create a projection class (NoeudProjection) for my entity, and another projection class (NoeudRef) for its relation.
 
-When my repository queries the db, it returns the projection entity but doesn't try
-to convert the @RelationshipProperties class to the projected class (Enfant).
+When my repository queries the db, it returns the projected entity but doesn't try to convert the relation
+projection.
 
 The following testcase fragment:
 
@@ -14,10 +14,10 @@ Optional<NoeudProjection> projectionAModifier = repository.findProjectionByIdDef
 Generates the error:
 
 ```
-Cannot cast com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity to com.example.sdn6.projection.Enfant
-java.lang.ClassCastException: Cannot cast com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity to com.example.sdn6.projection.Enfant
+Cannot cast com.example.sdn6.entity.NoeudMaquetteEntity to com.example.sdn6.projection.NoeudRef
+java.lang.ClassCastException: Cannot cast com.example.sdn6.entity.NoeudMaquetteEntity to com.example.sdn6.projection.NoeudRef
 	at java.base/java.lang.Class.cast(Class.java:3605)
-	at com.example.sdn6.projection.NoeudProjection_Accessor_payilt.setProperty(Unknown Source)
+	at com.example.sdn6.projection.NoeudProjection_Accessor_k3h1qu.setProperty(Unknown Source)
 	at org.springframework.data.mapping.model.InstantiationAwarePropertyAccessor.setProperty(InstantiationAwarePropertyAccessor.java:104)
 	at org.springframework.data.neo4j.core.mapping.DtoInstantiatingConverter.setPropertyOnDtoObject(DtoInstantiatingConverter.java:183)
 	at org.springframework.data.neo4j.core.mapping.DtoInstantiatingConverter.lambda$convert$4(DtoInstantiatingConverter.java:146)
@@ -31,22 +31,6 @@ java.lang.ClassCastException: Cannot cast com.example.sdn6.entity.NoeudMaquetteA
 	at org.springframework.data.repository.query.ResultProcessor$ChainingConverter.convert(ResultProcessor.java:240)
 	at org.springframework.data.repository.query.ResultProcessor.processResult(ResultProcessor.java:170)
 	at org.springframework.data.neo4j.repository.query.AbstractNeo4jQuery.execute(AbstractNeo4jQuery.java:111)
-	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.doInvoke(RepositoryMethodInvoker.java:137)
-	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke(RepositoryMethodInvoker.java:121)
-	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.doInvoke(QueryExecutorMethodInterceptor.java:159)
-	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.invoke(QueryExecutorMethodInterceptor.java:138)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
-	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123)
-	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:388)
-	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
-	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
-	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186)
-	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:215)
-	at com.sun.proxy.$Proxy89.findProjectionByIdDefinition(Unknown Source)
-	at com.example.sdn6.Sdn6Test.testProjection(Sdn6Test.java:51)
 ```
 
 To reproduce the error just run Sdn6Test testcase
@@ -55,60 +39,39 @@ Fragment of my entities:
 
 ```
 @Node("ObjetMaquette")
-public class NoeudMaquetteEntity {
+public class NoeudEntity {
 
     @GeneratedValue
     @Id
     private Long id;
-
-    @Relationship(type = "A_POUR_ENFANT")
-    private List<NoeudMaquetteAPourEnfantRelationEntity> enfants;
-
-    @Relationship(type = "A_POUR_ENFANT", direction = Relationship.Direction.INCOMING)
-    @ReadOnlyProperty
-    private List<NoeudMaquetteAPourEnfantRelationEntity> parents;
 
     private UUID idDefinition;
     private String code;
-    private String libelleCourt;
-    private String libelleLong;
-```
+    private String firstName;
+    private String lastName;
 
-```
-@RelationshipProperties
-public class NoeudMaquetteAPourEnfantRelationEntity {
+    @Relationship(type = "A_POUR_ENFANT")
+    private NoeudEntity child;
 
-    @GeneratedValue
-    @Id
-    private Long id;
-
-    @TargetNode
-    private NoeudMaquetteEntity enfant;
-
-    private Boolean obligatoire;
+    @Relationship(type = "A_POUR_ENFANT", direction = Relationship.Direction.INCOMING)
+    @ReadOnlyProperty
+    private NoeudEntity parent;
 ```
 
 Projected classes:
 
 ```
 public class NoeudProjection {
+
     private Long id;
     private UUID idDefinition;
     private String code;
-    private String libelleCourt;
-    private String libelleLong;
-```
-
-```
-public class Enfant {
-
-    private NoeudRef enfant;
-    private Integer ordre;
-    private Boolean obligatoire;
+    private String firstName;
+    private String lastName;
+    private NoeudRef child;
 ```
 
 ```
 public class NoeudRef {
-
     private UUID idDefinition;
 ```

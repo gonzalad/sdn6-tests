@@ -1,10 +1,9 @@
 package com.example.sdn6.spa;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import com.example.sdn6.entity.NoeudMaquetteEntity;
+import com.example.sdn6.entity.NoeudEntity;
 import com.example.sdn6.repository.NoeudMaquetteRepository;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +16,8 @@ public class NoeudMaquetteServicePortAdapter {
         this.repository = repository;
     }
 
-    public Optional<NoeudMaquetteEntity> lireNoeudAvecDescendance(UUID idDefinition) {
-        List<NoeudMaquetteEntity> oms = repository.findArbre(idDefinition);
+    public Optional<NoeudEntity> lireNoeudAvecDescendance(UUID idDefinition) {
+        List<NoeudEntity> oms = repository.findArbre(idDefinition);
         // om.enfant est null si l'om n'a pas d'enfants
         // on valorise une liste vide pour que la couche adaptateur
         // puisse distinguer les cas:

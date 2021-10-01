@@ -1,6 +1,5 @@
 package com.example.sdn6.projection;
 
-import java.util.List;
 import java.util.UUID;
 
 public class NoeudProjection {
@@ -8,8 +7,9 @@ public class NoeudProjection {
     private Long id;
     private UUID idDefinition;
     private String code;
-    private String libelleCourt;
-    private String libelleLong;
+    private String firstName;
+    private String lastName;
+    private NoeudRef child;
 
     public Long getId() {
         return id;
@@ -18,8 +18,6 @@ public class NoeudProjection {
     public void setId(Long id) {
         this.id = id;
     }
-
-    private Enfant enfants;
 
     public UUID getIdDefinition() {
         return idDefinition;
@@ -37,27 +35,27 @@ public class NoeudProjection {
         this.code = code;
     }
 
-    public String getLibelleCourt() {
-        return libelleCourt;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setLibelleCourt(String libelleCourt) {
-        this.libelleCourt = libelleCourt;
+    public void setFirstname(String libelleCourt) {
+        this.firstName = libelleCourt;
     }
 
-    public String getLibelleLong() {
-        return libelleLong;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLibelleLong(String libelleLong) {
-        this.libelleLong = libelleLong;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public Enfant getEnfants() {
-        return enfants;
+    public NoeudRef getChild() {
+        return child;
     }
 
-    public void setEnfants(Enfant enfants) {
-        this.enfants = enfants;
+    public void setChild(NoeudRef child) {
+        this.child = child;
     }
 }

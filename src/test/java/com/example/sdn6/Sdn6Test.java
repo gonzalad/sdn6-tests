@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.example.sdn6.entity.NoeudMaquetteEntity;
-import com.example.sdn6.projection.Enfant;
+import com.example.sdn6.entity.NoeudEntity;
 import com.example.sdn6.projection.NoeudProjection;
+import com.example.sdn6.projection.NoeudRef;
 import com.example.sdn6.repository.NoeudMaquetteRepository;
 import com.example.sdn6.spa.NoeudMaquetteServicePortAdapter;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,14 +32,14 @@ class Sdn6Test {
     void testProjection() {
 
         // 1. Création graphe initial
-        NoeudMaquetteEntity f1 = newNoeudMaquetteEntity("F1");
-        NoeudMaquetteEntity of2 = newNoeudMaquetteEntity("OF2");
-        NoeudMaquetteEntity of1 = newNoeudMaquetteEntity("OF1");
-        of1.setLibelleLong("libelleLong");
-        NoeudMaquetteEntity of11 = newNoeudMaquetteEntity("OF11");
-        of1.addEnfant(of11, true);
-        f1.addEnfant(of1, true);
-        List<NoeudMaquetteEntity> entities = List.of(
+        NoeudEntity f1 = newNoeudEntity("F1");
+        NoeudEntity of2 = newNoeudEntity("OF2");
+        NoeudEntity of1 = newNoeudEntity("OF1");
+        of1.setLastname("libelleLong");
+        NoeudEntity of11 = newNoeudEntity("OF11");
+        of1.setChild(of11);
+        f1.setChild(of1);
+        List<NoeudEntity> entities = List.of(
             of2,
             of1,
             of11,
@@ -51,31 +51,28 @@ class Sdn6Test {
         Optional<NoeudProjection> projectionAModifier = repository.findProjectionByIdDefinition(of1.getIdDefinition());
         assertThat(projectionAModifier).isNotEmpty();
         assertThat(projectionAModifier.get().getCode()).isEqualTo("OF1");
-        assertThat(projectionAModifier.get().getEnfants()).isInstanceOf(Enfant.class);
-        projectionAModifier.get().setLibelleCourt("modifie");
+        assertThat(projectionAModifier.get().getChild()).isInstanceOf(NoeudRef.class);
+        projectionAModifier.get().setFirstname("modifie");
         repository.save(projectionAModifier.get());
 
         // 3. Vérification des relations de la formation
-        Optional<NoeudMaquetteEntity> f1Lue = spa.lireNoeudAvecDescendance(f1.getIdDefinition());
+        Optional<NoeudEntity> f1Lue = spa.lireNoeudAvecDescendance(f1.getIdDefinition());
         assertThat(f1Lue).isPresent();
-        assertThat(f1Lue.get().getEnfants().getEnfant().getCode()).isEqualTo(of1.getCode());
-        assertThat(f1Lue.get().getEnfants().getEnfant())
+        assertThat(f1Lue.get().getChild().getCode()).isEqualTo(of1.getCode());
+        assertThat(f1Lue.get().getChild())
             .satisfies(om -> {
-                // on vérifie que l'attribut a bien été modifié
-                assertThat(om.getLibelleCourt()).isEqualTo("modifie");
-                // on vérifie que les attributs n'existant pas dans NoeudProjection sont bien conservés
-                assertThat(om.getLibelleLong()).isEqualTo("libelleLong");
-                // la relation (of1)-[:HAS_ENFANT]->(of11) a été conservée, youhou !!!
-                assertThat(om.getEnfants()).isInstanceOf(NoeudMaquetteEntity.class);
+                assertThat(om.getFirstName()).isEqualTo("modifie");
+                assertThat(om.getLastName()).isEqualTo("libelleLong");
+                assertThat(om.getChild()).isInstanceOf(NoeudEntity.class);
             });
 
     }
 
-    private NoeudMaquetteEntity newNoeudMaquetteEntity(String code) {
-        NoeudMaquetteEntity entity = new NoeudMaquetteEntity();
+    private NoeudEntity newNoeudEntity(String code) {
+        NoeudEntity entity = new NoeudEntity();
         entity.setIdDefinition(UUID.randomUUID());
         entity.setCode(code);
-        entity.setLibelleCourt("lib-" + code);
+        entity.setFirstName("lib-" + code);
         return entity;
     }
 }

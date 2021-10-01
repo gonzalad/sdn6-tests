@@ -1,6 +1,6 @@
 package com.example.sdn6.repository;
 
-import com.example.sdn6.entity.NoeudMaquetteEntity;
+import com.example.sdn6.entity.NoeudEntity;
 import com.example.sdn6.projection.NoeudProjection;
 import org.springframework.data.neo4j.core.Neo4jTemplate;
 
@@ -14,6 +14,6 @@ public class CustomNoeudMaquetteRepositoryImpl implements CustomNoeudMaquetteRep
 
     @Override
     public NoeudProjection save(NoeudProjection projection) {
-        return neo4jTemplate.save(NoeudMaquetteEntity.class).one(projection);
+        return neo4jTemplate.save(NoeudEntity.class).one(projection);
     }
 }
