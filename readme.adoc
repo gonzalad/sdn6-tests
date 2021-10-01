@@ -1,0 +1,91 @@
+= Issue when projecting relations (@RelationshipProperties)
+
+I create a projection class for my entity, and a projection for its relations.
+
+When my repository queries the db, it returns the projection entity but the class of
+the relation attribute is the original @RelationshipProperties class and not the projected
+class.
+
+The following testcase fragment:
+
+```
+Optional<NoeudProjection> projectionAModifier = repository.findProjectionByIdDefinition(of1.getIdDefinition());
+assertThat(projectionAModifier).isNotEmpty();
+assertThat(projectionAModifier.get().getCode()).isEqualTo("OF1");
+assertThat(projectionAModifier.get().getEnfants()).isOfAnyClassIn(Enfant.class);
+```
+
+Generates the error:
+
+```
+Expecting:
+  [com.example.sdn6.entity.NoeudMaquetteAPourEnfantRelationEntity@4c599679]
+to be of one these types:
+  [com.example.sdn6.projection.Enfant]
+but was:
+  java.util.ArrayList
+```
+
+To reproduce the error just run Sdn6Test testcase
+
+Fragment of my entities:
+
+```
+@Node("ObjetMaquette")
+public class NoeudMaquetteEntity {
+
+    @GeneratedValue
+    @Id
+    private Long id;
+
+    @Relationship(type = "A_POUR_ENFANT")
+    private List<NoeudMaquetteAPourEnfantRelationEntity> enfants;
+
+    @Relationship(type = "A_POUR_ENFANT", direction = Relationship.Direction.INCOMING)
+    @ReadOnlyProperty
+    private List<NoeudMaquetteAPourEnfantRelationEntity> parents;
+
+    private UUID idDefinition;
+    private String code;
+    private String libelleCourt;
+    private String libelleLong;
+```
+
+```
+@RelationshipProperties
+public class NoeudMaquetteAPourEnfantRelationEntity {
+
+    @GeneratedValue
+    @Id
+    private Long id;
+
+    @TargetNode
+    private NoeudMaquetteEntity enfant;
+
+    private Boolean obligatoire;
+```
+
+Projected classes:
+
+```
+public class NoeudProjection {
+    private Long id;
+    private UUID idDefinition;
+    private String code;
+    private String libelleCourt;
+    private String libelleLong;
+```
+
+```
+public class Enfant {
+
+    private NoeudRef enfant;
+    private Integer ordre;
+    private Boolean obligatoire;
+```
+
+```
+public class NoeudRef {
+
+    private UUID idDefinition;
+```

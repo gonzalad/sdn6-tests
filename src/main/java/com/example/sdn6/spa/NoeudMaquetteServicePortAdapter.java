@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
-import com.example.sdn6.projection.NoeudProjection;
 import com.example.sdn6.repository.NoeudMaquetteRepository;
 import org.springframework.stereotype.Component;
 
@@ -27,13 +26,5 @@ public class NoeudMaquetteServicePortAdapter {
         // - relation non existante
         oms.stream().filter(om -> om.getEnfants() == null).forEach(om -> om.setEnfants(new ArrayList<>()));
         return oms.stream().filter(it -> it.getIdDefinition().equals(idDefinition)).findAny();
-    }
-
-    public Optional<NoeudMaquetteEntity> lireNoeud(UUID idDefinition) {
-        return repository.lireNoeud(idDefinition);
-    }
-
-    public Optional<NoeudProjection> lireNoeudProjection(UUID idDefinition) {
-        return repository.findProjectionByIdDefinition(idDefinition);
     }
 }

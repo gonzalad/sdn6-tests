@@ -12,23 +12,16 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEntity, Long>, CustomNoeudMaquetteRepository {
 
+    /**
+     * A noter cette méthode retourne une liste alors qu'on s'attend à un seul résultat.
+     * SDN retourne une ligne par instance de NoeudMaquetteEntity détecté dans le résultat
+     */
     //@formatter:off
     @Query("MATCH /*+ OGM READ_ONLY */ e = (racine:ObjetMaquette)-[re:A_POUR_ENFANT*0..]->(om:ObjetMaquette)\n"
         + " WHERE racine.idDefinition = $idDefinition\n"
         + " WITH DISTINCT om\n"
         + " OPTIONAL MATCH (om)-[re:A_POUR_ENFANT*0..]->(e:ObjetMaquette)\n"
-        + " WITH om, collect(re) as enfants, collect(e) as ne\n"
-        + " MATCH t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->()\n"
-        + " RETURN om, enfants, ne, collect(relationships(t)) as type, collect(nodes(t)) as nt\n"
-//        + " RETURN om,\n"
-//        + "   enfants, e"
-        // +","
-  //      + "\n"
-        //    + "   [[t = (om)-[:A_POUR_ENFANT]->() | nodes(t)]],\n"
-        //+ "   [[t = (om)-[:A_POUR_ENFANT]->() | relationships(t)]] as enfants,\n"
-        //+ "   [[t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->() | [nodes(t), relationships(t)]]]\n"
-/*        + "   [[n = (enfant)-[:EST_DE_NATURE]->() | [nodes(n), relationships(n)]]],"
-        + "   [[gh = (enfant)-[:A_POUR_GROUPE_HABILITATION*0..1]->() | [nodes(gh), relationships(gh)]]]"*/
+        + " RETURN om, collect(re) as enfants, collect(e) as ne\n"
     )
     //@formatter:on
     List<NoeudMaquetteEntity> findArbre(UUID idDefinition);
@@ -36,31 +29,18 @@ public interface NoeudMaquetteRepository extends CrudRepository<NoeudMaquetteEnt
     //@formatter:off
     @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"
         + " WHERE om.idDefinition = $idDefinition\n"
-        + " WITH om\n"
-        + " MATCH t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->()\n"
-        + " RETURN om, collect(relationships(t)) as type, collect(nodes(t)) as nt\n"
-//        + " RETURN om,\n"
-//        + "   enfants, e"
-        // +","
-        //      + "\n"
-        //    + "   [[t = (om)-[:A_POUR_ENFANT]->() | nodes(t)]],\n"
-        //+ "   [[t = (om)-[:A_POUR_ENFANT]->() | relationships(t)]] as enfants,\n"
-        //+ "   [[t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->() | [nodes(t), relationships(t)]]]\n"
-/*        + "   [[n = (enfant)-[:EST_DE_NATURE]->() | [nodes(n), relationships(n)]]],"
-        + "   [[gh = (enfant)-[:A_POUR_GROUPE_HABILITATION*0..1]->() | [nodes(gh), relationships(gh)]]]"*/
+        + " RETURN om\n"
     )
     //@formatter:on
     Optional<NoeudMaquetteEntity> lireNoeud(UUID idDefinition);
 
     //@formatter:off
-    @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"
-        + " WHERE om.idDefinition = $idDefinition\n"
-        + " WITH om\n"
-        + " MATCH t = (om)-[:EST_DE_TYPE]->()-[:A_POUR_CHAMP_ADDITIONNEL*0..1]->()\n"
-        + " WITH om, collect(relationships(t)) as type, collect(nodes(t)) as nt\n"
-        + " OPTIONAL MATCH (om)-[re:A_POUR_ENFANT]->(e)\n"
-        + " RETURN om, type, nt, collect(re) as enfants, collect(e) as ne\n"
-    )
+//    @Query("MATCH /*+ OGM READ_ONLY */ (om:ObjetMaquette)\n"
+//        + " WHERE om.idDefinition = $idDefinition\n"
+//        + " WITH om\n"
+//        + " OPTIONAL MATCH (om)-[re:A_POUR_ENFANT]->(e)\n"
+//        + " RETURN om, collect(re) as enfants, collect(e) as ne\n"
+//    )
     //@formatter:on
     Optional<NoeudProjection> findProjectionByIdDefinition(UUID idDefinition);
 

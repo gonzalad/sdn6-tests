@@ -11,32 +11,23 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 @Node("ObjetMaquette")
-public abstract class NoeudMaquetteEntity {
+public class NoeudMaquetteEntity {
 
     @GeneratedValue
     @Id
     private Long id;
 
-    // @Convert(UuidStringConverter.class)
-    private UUID idImmuable;
-
-    private String codeStructure;
-
-    // @Convert(UuidStringConverter.class)
     private UUID idDefinition;
-
     private String code;
     private String libelleCourt;
     private String libelleLong;
-    private boolean codeModifiable;
-    private String contrainteVersion;
-
-    @Relationship(type = "EST_DE_TYPE")
-    // @ReadOnlyProperty
-    private NoeudTypeEntity type;
 
     @Relationship(type = "A_POUR_ENFANT")
     private List<NoeudMaquetteAPourEnfantRelationEntity> enfants;
+
+    @Relationship(type = "A_POUR_ENFANT", direction = Relationship.Direction.INCOMING)
+    @ReadOnlyProperty
+    private List<NoeudMaquetteAPourEnfantRelationEntity> parents;
 
     public Long getId() {
         return id;
@@ -44,22 +35,6 @@ public abstract class NoeudMaquetteEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public UUID getIdImmuable() {
-        return idImmuable;
-    }
-
-    public void setIdImmuable(UUID idImmuable) {
-        this.idImmuable = idImmuable;
-    }
-
-    public String getCodeStructure() {
-        return codeStructure;
-    }
-
-    public void setCodeStructure(String codeStructure) {
-        this.codeStructure = codeStructure;
     }
 
     public UUID getIdDefinition() {
@@ -86,36 +61,20 @@ public abstract class NoeudMaquetteEntity {
         this.libelleCourt = libelleCourt;
     }
 
-    public String getLibelleLong() {
-        return libelleLong;
-    }
-
-    public void setLibelleLong(String libelleLong) {
-        this.libelleLong = libelleLong;
-    }
-
-    public boolean isCodeModifiable() {
-        return codeModifiable;
-    }
-
-    public void setCodeModifiable(boolean codeModifiable) {
-        this.codeModifiable = codeModifiable;
-    }
-
-    public String getContrainteVersion() {
-        return contrainteVersion;
-    }
-
-    public void setContrainteVersion(String contrainteVersion) {
-        this.contrainteVersion = contrainteVersion;
-    }
-
     public List<NoeudMaquetteAPourEnfantRelationEntity> getEnfants() {
         return enfants;
     }
 
     public void setEnfants(List<NoeudMaquetteAPourEnfantRelationEntity> enfants) {
         this.enfants = enfants;
+    }
+
+    public String getLibelleLong() {
+        return libelleLong;
+    }
+
+    public void setLibelleLong(String libelleLong) {
+        this.libelleLong = libelleLong;
     }
 
     public NoeudMaquetteAPourEnfantRelationEntity addEnfant(NoeudMaquetteEntity enfant, boolean obligatoire) {
@@ -132,16 +91,26 @@ public abstract class NoeudMaquetteEntity {
         lien.getEnfant().addLienParent(lien);
     }
 
-    protected abstract void addLienParent(NoeudMaquetteAPourEnfantRelationEntity lien);
-
-    protected abstract void removeLienParent(NoeudMaquetteAPourEnfantRelationEntity lien);
-
-    public NoeudTypeEntity getType() {
-        return type;
+    private void addLienParent(NoeudMaquetteAPourEnfantRelationEntity lien) {
+        if (getParents() == null) {
+            setParents(new ArrayList<>());
+        }
+        getParents().add(lien);
     }
 
-    public void setType(NoeudTypeEntity type) {
-        this.type = type;
+    private void removeLienParent(NoeudMaquetteAPourEnfantRelationEntity lien) {
+        if (getParents() == null) {
+            setParents(new ArrayList<>());
+        }
+        getParents().remove(lien);
+    }
+
+    public List<NoeudMaquetteAPourEnfantRelationEntity> getParents() {
+        return parents;
+    }
+
+    public void setParents(List<NoeudMaquetteAPourEnfantRelationEntity> parents) {
+        this.parents = parents;
     }
 
     @Override
@@ -152,7 +121,7 @@ public abstract class NoeudMaquetteEntity {
         if (!(o instanceof NoeudMaquetteEntity)) {
             return false;
         }
-        NoeudMaquetteEntity that = (NoeudMaquetteEntity)o;
+        NoeudMaquetteEntity that = (NoeudMaquetteEntity) o;
         return Objects.equals(idDefinition, that.idDefinition);
     }
 
