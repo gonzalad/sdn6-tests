@@ -1,7 +1,9 @@
 package com.example.sdn6.repository;
 
-import com.example.sdn6.projection.NoeudProjection;
+import java.util.List;
+import com.example.sdn6.projection.NoeudAndFormationsParentesResult;
 
 public interface CustomNoeudMaquetteRepository {
-    NoeudProjection save(NoeudProjection entity);
+
+    List<NoeudAndFormationsParentesResult> findAllNoeudAndFormationsParentesByCode(String code);
 }

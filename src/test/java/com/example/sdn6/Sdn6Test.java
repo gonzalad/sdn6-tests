@@ -1,16 +1,18 @@
 package com.example.sdn6;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.io.*;
+import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
-import com.example.sdn6.entity.NoeudMaquetteEntity;
-import com.example.sdn6.projection.NoeudProjection;
+import com.example.sdn6.containers.Neo4j;
+import com.example.sdn6.projection.NoeudAndFormationsParentesResult;
 import com.example.sdn6.repository.NoeudMaquetteRepository;
-import com.example.sdn6.spa.NoeudMaquetteServicePortAdapter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.neo4j.core.Neo4jClient;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 @SpringBootTest
 class Sdn6Test {
@@ -19,38 +21,33 @@ class Sdn6Test {
     private NoeudMaquetteRepository repository;
 
     @Autowired
-    private NoeudMaquetteServicePortAdapter spa;
+    private Neo4jClient neo4jClient;
 
     @BeforeEach
-    void setUp() {
-        repository.deleteAll();
+    void setupData() throws IOException {
+        neo4jClient.query("MATCH (n) DETACH DELETE n").run();
+        CypherUtils.loadCypherFromResource("/data.cypher", neo4jClient);
     }
 
     @Test
-    void testProjection() {
-        NoeudMaquetteEntity om = newEntity("F1");
-        om.setReadOnly(true);
-        repository.save(om);
+    void testFindAllNoeudAndFormationsParentesByCode() {
 
-        // use projection for persistence
-        Optional<NoeudProjection> projectionAModifier = repository.findProjectionByIdDefinition(om.getIdDefinition());
-        assertThat(projectionAModifier).isNotEmpty();
-        assertThat(projectionAModifier.get().getCode()).isEqualTo("F1");
-        projectionAModifier.get().setCode("modifie");
-        repository.save(projectionAModifier.get());
+        String code = "OF1";
 
-        Optional<NoeudMaquetteEntity> omRead = repository.findByIdDefinition(om.getIdDefinition());
-        assertThat(omRead).isPresent();
-        // check attribute updated by projection
-        assertThat(omRead.get().getCode()).isEqualTo("modifie");
-        // check attribute was not updated since it's not part of the projection
-        assertThat(omRead.get().isReadOnly()).isEqualTo(true);
+        List<NoeudAndFormationsParentesResult> noeudAndFormations = repository.findAllNoeudAndFormationsParentesByCode(code);
+
+        assertThat(noeudAndFormations).hasSize(1);
+        NoeudAndFormationsParentesResult result = noeudAndFormations.get(0);
+        assertThat(result.getOm()).isNotNull();
+        assertThat(result.getOm().getCode()).isEqualTo(code);
+        assertThat(result.getFormationsParentes()).hasSize(1);
+        // issue: relations are not hydrated
+        assertThat(result.getOm().getType()).isNotNull();
     }
 
-    private NoeudMaquetteEntity newEntity(String code) {
-        NoeudMaquetteEntity entity = new NoeudMaquetteEntity();
-        entity.setIdDefinition(UUID.randomUUID());
-        entity.setCode(code);
-        return entity;
+
+    @DynamicPropertySource
+    static void neo4jProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.neo4j.uri", () -> Neo4j.database().getBoltUrl());
     }
 }
