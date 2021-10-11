@@ -10,7 +10,6 @@ import java.util.stream.StreamSupport;
 import com.example.sdn6.entity.FormationEntity;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
 import com.example.sdn6.projection.NoeudAndFormationsParentesResult;
-import org.neo4j.driver.Record;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.types.MapAccessor;
 import org.neo4j.driver.types.TypeSystem;
@@ -51,8 +50,9 @@ public class CustomNoeudMaquetteRepositoryImpl implements CustomNoeudMaquetteRep
             .bindAll(parameters) //
             .fetchAs(NoeudMaquetteEntity.class) //
             .mappedBy((t, r) -> {
-
-                NoeudMaquetteEntity om = mappingFunction.apply(t, r.get("om"));
+                // RecordMapAccessor is used to convert relation properties
+                // otherwise om.type would be null
+                NoeudMaquetteEntity om = mappingFunction.apply(t, new RecordMapAccessor(r));
 
                 List<FormationEntity> formationsParentes = this.asListNoeudMaquetteEntity(r.get("formationsParentes"), mappingFunction, t, FormationEntity.class);
                 noeudsAndFormations.add(new NoeudAndFormationsParentesResult(om, formationsParentes));
@@ -80,7 +80,9 @@ public class CustomNoeudMaquetteRepositoryImpl implements CustomNoeudMaquetteRep
             .bindAll(parameters) //
             .fetchAs(NoeudMaquetteEntity.class) //
             .mappedBy((t, r) ->
-                mappingFunction.apply(t, r.get("om"))
+                // RecordMapAccessor is used to convert relation properties
+                // otherwise om.type would be null
+                mappingFunction.apply(t, new RecordMapAccessor(r))
             ) //
             .all());
     }
