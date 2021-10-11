@@ -10,6 +10,7 @@ import java.util.stream.StreamSupport;
 import com.example.sdn6.entity.FormationEntity;
 import com.example.sdn6.entity.NoeudMaquetteEntity;
 import com.example.sdn6.projection.NoeudAndFormationsParentesResult;
+import org.neo4j.driver.Record;
 import org.neo4j.driver.Value;
 import org.neo4j.driver.types.MapAccessor;
 import org.neo4j.driver.types.TypeSystem;
@@ -45,17 +46,77 @@ public class CustomNoeudMaquetteRepositoryImpl implements CustomNoeudMaquetteRep
         parameters.put("code", code);
         List<NoeudAndFormationsParentesResult> noeudsAndFormations = new ArrayList<>();
         BiFunction<TypeSystem, MapAccessor, NoeudMaquetteEntity> mappingFunction = neo4jMappingContext.getRequiredMappingFunctionFor(NoeudMaquetteEntity.class);
+
         neo4jClient.query(query) //
             .bindAll(parameters) //
             .fetchAs(NoeudMaquetteEntity.class) //
             .mappedBy((t, r) -> {
+
                 NoeudMaquetteEntity om = mappingFunction.apply(t, r.get("om"));
+
                 List<FormationEntity> formationsParentes = this.asListNoeudMaquetteEntity(r.get("formationsParentes"), mappingFunction, t, FormationEntity.class);
                 noeudsAndFormations.add(new NoeudAndFormationsParentesResult(om, formationsParentes));
                 return om;
             }) //
             .all();
         return noeudsAndFormations;
+    }
+
+    @Override
+    public List<NoeudMaquetteEntity> findAllNoeudByCode(String code) {
+        var query = "";
+        query += " MATCH pof = (om:ObjetMaquette)-[r:EST_DE_TYPE]->(type:NoeudType)\n"
+            + " WHERE \n"
+            + " om.code = $code\n";
+        query += "WITH om, collect(type) as types, collect(r) as rs\n";
+        query += "RETURN \n";
+        query += "    om as om,\n";
+        query += "    types, rs";
+        //@formatter:on
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("code", code);
+        BiFunction<TypeSystem, MapAccessor, NoeudMaquetteEntity> mappingFunction = neo4jMappingContext.getRequiredMappingFunctionFor(NoeudMaquetteEntity.class);
+        return new ArrayList<>(neo4jClient.query(query) //
+            .bindAll(parameters) //
+            .fetchAs(NoeudMaquetteEntity.class) //
+            .mappedBy((t, r) ->
+                mappingFunction.apply(t, r.get("om"))
+            ) //
+            .all());
+    }
+
+    @Override
+    public List<NoeudMaquetteEntity> findAllNoeudByCodeWithNeo4jTemplate(String code) {
+        var query = "";
+        query += " MATCH pof = (om:ObjetMaquette)-[r:EST_DE_TYPE]->(type:NoeudType)\n"
+            + " WHERE \n"
+            + " om.code = $code\n";
+        query += "WITH om, collect(type) as types, collect(r) as rs\n";
+        query += "RETURN \n";
+        query += "    om as om,\n";
+        query += "    types, rs";
+        //@formatter:on
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("code", code);
+        return new ArrayList<>(neo4jTemplate.findAll(query, parameters, NoeudMaquetteEntity.class));
+    }
+
+    @Override
+    public List<NoeudAndFormationsParentesResult> findAllNoeudAndFormationsParentesByCodeWithNeo4jTemplate(String code) {
+        var query = "";
+        query += " MATCH pof = (om:ObjetMaquette)-[r:EST_DE_TYPE]->(type:NoeudType)\n"
+            + " WHERE \n"
+            + " om.code = $code\n";
+        query += "WITH om, collect(type) as types, collect(r) as rs\n";
+        query += "OPTIONAL MATCH p = (om)<-[:A_POUR_ENFANT*1..]-(f:Formation)\n";
+        query += "RETURN \n";
+        query += "    distinct om,\n";
+        query += "    collect(f),\n";
+        query += "    types, rs";
+        //@formatter:on
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("code", code);
+        return new ArrayList<>(neo4jTemplate.findAll(query, parameters, NoeudAndFormationsParentesResult.class));
     }
 
     private <S extends NoeudMaquetteEntity> List<S> asListNoeudMaquetteEntity(Value value, //
