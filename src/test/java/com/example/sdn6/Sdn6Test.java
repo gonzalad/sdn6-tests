@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
+import com.example.sdn6.container.Neo4j;
 import com.example.sdn6.entity.Categorie;
 import com.example.sdn6.entity.ChampAdditionnelEntity;
 import com.example.sdn6.entity.FormationEntity;
@@ -42,6 +43,8 @@ import org.springframework.data.neo4j.core.mapping.Neo4jPersistentEntity;
 import org.springframework.data.neo4j.core.mapping.Neo4jPersistentProperty;
 import org.springframework.data.neo4j.core.mapping.NestedRelationshipContext;
 import org.springframework.data.neo4j.core.mapping.NodeDescription;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 @SpringBootTest
 class Sdn6Test {
@@ -531,4 +534,10 @@ class Sdn6Test {
         entity.setLibelleCourt("lib-" + code);
         return entity;
     }
+
+    @DynamicPropertySource
+    static void neo4jProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.data.neo4j.uri", () -> Neo4j.database().getBoltUrl());
+    }
+
 }
