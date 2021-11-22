@@ -1,0 +1,6 @@
+Composite property issues in SDN 6.2.0:
+
+. Removing entry in a composite property doesn't change the value in the database. +
+  See Sdn6Test#removeEntryInCompositePropertyShouldRemoveEntryInDb()
+. Retrieving a string entry from db returns a StringValue instance instead of a String instance +
+  See Sdn6Test#givenCompositePropertyWithStringEntryWhenQueryThenVerifyReturnsStringInstance()
