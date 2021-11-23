@@ -26,8 +26,12 @@ import org.springframework.data.neo4j.core.Neo4jClient;
 public final class CypherUtils {
 
 	public static void loadCypherFromResource(String resource, Neo4jClient neo4jClient) throws IOException {
+		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resource);
+		if (is == null) {
+			throw new RuntimeException("Fichier " + resource + " inexistant");
+		}
 		try (BufferedReader moviesReader = new BufferedReader(
-				new InputStreamReader(CypherUtils.class.getResourceAsStream(resource)))) {
+				new InputStreamReader(is))) {
 			for (String statement : moviesReader.lines().collect(Collectors.joining(" ")).split(";")) {
 				neo4jClient.query(statement).run();
 			}

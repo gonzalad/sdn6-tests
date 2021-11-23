@@ -16,7 +16,7 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
  */
 public class Neo4j {
     private static final Logger log = LoggerFactory.getLogger(Neo4j.class);
-    private static final String NEO4J_VERSION = "4.2.4";
+    private static final String NEO4J_VERSION = "4.3.7";
     private static final String NEO4J_DOCKER_IMAGE = "neo4j:" + NEO4J_VERSION;
 
     private static Neo4jContainer neo4jContainer;
