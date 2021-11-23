@@ -12,6 +12,8 @@ public class Child {
     @Id
     private Long id;
 
+    private boolean required;
+
     @TargetNode
     private WidgetEntity target;
 
@@ -36,5 +38,13 @@ public class Child {
 
     public void setTarget(WidgetEntity target) {
         this.target = target;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 }
