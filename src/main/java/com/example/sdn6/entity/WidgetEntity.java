@@ -16,15 +16,8 @@ public class WidgetEntity {
     @GeneratedValue
     @Id
     private Long id;
-
     private String code;
     private String label;
-
-    @Relationship(type = "HAS_TYPE")
-    private WidgetTypeEntity type;
-
-    @Relationship(type = "HAS_CHILD")
-    private List<Child> childs = new ArrayList<>();
 
     @CompositeProperty
     private Map<String, Object> additionalFields = new HashMap<>();
@@ -53,36 +46,11 @@ public class WidgetEntity {
         this.label = label;
     }
 
-    public WidgetTypeEntity getType() {
-        return type;
-    }
-
-    public void setType(WidgetTypeEntity type) {
-        this.type = type;
-    }
-
-    public WidgetEntity child(WidgetEntity entity) {
-        addChild(entity);
-        return this;
-    }
-
-    public List<Child> getChilds() {
-        return childs;
-    }
-
     public Map<String, Object> getAdditionalFields() {
         return additionalFields;
     }
 
     public void setAdditionalFields(Map<String, Object> additionalFields) {
         this.additionalFields = additionalFields;
-    }
-
-    public void addChild(WidgetEntity entity) {
-        getChilds().add(new Child(entity));
-    }
-
-    public void setChilds(List<Child> childs) {
-        this.childs = childs;
     }
 }
