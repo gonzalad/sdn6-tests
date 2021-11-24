@@ -62,7 +62,9 @@ class Sdn6Test {
 
         WidgetEntity w3 = newWidget("w3", window);
 
-        repository.save(w3);
+        WidgetEntity saved = repository.save(w3);
+
+        assertThat(saved).isNotNull();
     }
 
     @Test
@@ -72,7 +74,9 @@ class Sdn6Test {
         WidgetEntity p3 = newWidget("p3", panel).child(b3);
         WidgetEntity w3 = newWidget("w3", window).child(p3);
 
-        repository.save(w3);
+        WidgetEntity saved = repository.save(w3);
+
+        assertThat(saved).isNotNull();
     }
 
     @Test
@@ -123,6 +127,23 @@ class Sdn6Test {
             .element(0)
             .extracting(WidgetEntity::getLabel)
             .isNull();
+    }
+
+    @Test
+    void testSaveAsWidgetAndChildWithCompositeProperty() {
+
+        String code = "Window1";
+        WidgetEntity window = repository.findByCode(code).orElseThrow();
+        window.setLabel("changed");
+        WidgetEntity b2 = repository.findByCode("Button2").orElseThrow();
+        window.addChild(b2);
+        window.getAdditionalFields().put("key1", "value1");
+
+        template.saveAs(window, WidgetAndChilds.class);
+
+        window = repository.findByCode(code).orElseThrow();
+        assertThat(window.getLabel()).isEqualTo("changed");
+        assertThat(window.getAdditionalFields()).hasSize(1);
     }
 
     @Test

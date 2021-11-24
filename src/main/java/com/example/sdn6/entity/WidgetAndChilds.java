@@ -1,6 +1,7 @@
 package com.example.sdn6.entity;
 
 import java.util.List;
+import java.util.Map;
 
 public interface WidgetAndChilds {
 
@@ -11,6 +12,8 @@ public interface WidgetAndChilds {
     List<ChildRef> getChilds();
 
     TypeRef getType();
+
+    Map<String, Object> getAdditionalFields();
 
     interface ChildRef {
 

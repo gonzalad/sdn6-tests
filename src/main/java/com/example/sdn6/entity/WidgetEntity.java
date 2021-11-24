@@ -1,7 +1,10 @@
 package com.example.sdn6.entity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.springframework.data.neo4j.core.schema.CompositeProperty;
 import org.springframework.data.neo4j.core.schema.GeneratedValue;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
@@ -22,6 +25,9 @@ public class WidgetEntity {
 
     @Relationship(type = "HAS_CHILD")
     private List<Child> childs = new ArrayList<>();
+
+    @CompositeProperty
+    private Map<String, Object> additionalFields = new HashMap<>();
 
     public Long getId() {
         return id;
@@ -62,6 +68,14 @@ public class WidgetEntity {
 
     public List<Child> getChilds() {
         return childs;
+    }
+
+    public Map<String, Object> getAdditionalFields() {
+        return additionalFields;
+    }
+
+    public void setAdditionalFields(Map<String, Object> additionalFields) {
+        this.additionalFields = additionalFields;
     }
 
     public void addChild(WidgetEntity entity) {
